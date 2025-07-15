@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+ENV/
+.env
+.venv
+
+# Flask
+instance/
+.webassets-cache
+
+# Audio & uploads
+*.wav
+*.mp3
+*.m4a
+temp_*
+
+# VSCode & editor
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Log
+*.log 
