@@ -105,16 +105,63 @@ Semua endpoint dapat diakses dari aplikasi web maupun mobile (CORS sudah aktif).
   - Response: Render HTML tabel riwayat latihan
   - (Untuk API mobile, bisa dibuat endpoint baru yang return JSON)
 
-### 4. Data Ayat Referensi
+### 4. Data Surah & Ayat (Baru)
 
-- **GET /data/ayat.json**
-  - Response: JSON array ayat (mode basic, tanpa tanda baca)
-- **GET /data/surah/{nomor}.json**
-  - Response: JSON per surah (mode lanjutan, Arab lengkap)
+- **GET /asr/api/surah**
+  - Response: JSON array daftar surah (id, nama_arab, nama_latin, jumlah_ayat)
+- **GET /asr/api/ayat?surah_id=...**
+  - Response: JSON array ayat untuk surah tertentu (id, nomor_ayat, teks_arab, teks_terjemah)
 
 ### Catatan
 
 - Semua endpoint web saat ini return HTML, bukan JSON. Untuk integrasi mobile, disarankan membuat endpoint baru (misal: /api/asr, /api/riwayat) yang return JSON.
 - CORS sudah aktif untuk seluruh backend (akses dari mobile/web lain diperbolehkan).
+- **Data surah & ayat sekarang diambil dari database SQLite, bukan dari file JSON lagi.**
+
+---
+
+## Alur Pengujian Bacaan
+
+1. User memilih surah terlebih dahulu
+2. User memilih ayat dari surah yang dipilih
+3. User upload atau rekam audio bacaan
+4. Sistem menampilkan hasil transkripsi dan umpan balik otomatis
+
+---
+
+## Testing API
+
+- Tersedia file `test_api.py` untuk menguji endpoint API utama (GET surah, GET ayat, POST upload audio). Jalankan dengan `python test_api.py` saat server aktif.
+
+---
+
+## Menjalankan Project dengan Ngrok (Akses dari Internet)
+
+Agar aplikasi Flask bisa diakses dari luar (misal: untuk demo mobile, kolaborasi, dsb), gunakan [ngrok](https://ngrok.com/):
+
+1. **Install ngrok**
+
+   - Download dari https://ngrok.com/download
+   - Ekstrak dan pastikan file `ngrok`/`ngrok.exe` bisa dijalankan dari terminal
+
+2. **Jalankan server Flask**
+
+   ```bash
+   python app.py
+   # (pastikan berjalan di http://localhost:5000)
+   ```
+
+3. **Expose port 5000 dengan ngrok**
+
+   ```bash
+   ngrok http 5000
+   ```
+
+   - Akan muncul URL publik seperti `https://xxxx.ngrok.io`
+   - Akses aplikasi dari mana saja lewat URL tersebut
+
+4. **Catatan**
+   - Jika ingin akses dari device mobile di jaringan berbeda, gunakan URL ngrok
+   - Untuk endpoint API, ganti `localhost:5000` dengan URL ngrok di aplikasi mobile/client
 
 ---
