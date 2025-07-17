@@ -1,0 +1,9 @@
+[
+  {"id": 1, "surah": "Al-Fatihah", "ayat": 1, "teks": "بسم الله الرحمن الرحيم"},
+  {"id": 2, "surah": "Al-Fatihah", "ayat": 2, "teks": "الحمد لله رب العالمين"},
+  {"id": 3, "surah": "Al-Fatihah", "ayat": 3, "teks": "الرحمن الرحيم"},
+  {"id": 4, "surah": "Al-Fatihah", "ayat": 4, "teks": "مالك يوم الدين"},
+  {"id": 5, "surah": "Al-Fatihah", "ayat": 5, "teks": "اياك نعبد واياك نستعين"},
+  {"id": 6, "surah": "Al-Fatihah", "ayat": 6, "teks": "اهدنا الصراط المستقيم"},
+  {"id": 7, "surah": "Al-Fatihah", "ayat": 7, "teks": "صراط الذين انعمت عليهم غير المغضوب عليهم ولا الضالين"}
+] 

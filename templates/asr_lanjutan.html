@@ -1,15 +1,15 @@
 {% extends 'layout.html' %}
-{% block title %}Uji Basic Whisper | ASR Quran{% endblock %}
+{% block title %}Uji Lanjutan Whisper | ASR Quran{% endblock %}
 {% block content %}
-<h2 class="mb-4">Uji Basic Whisper (ASR Quran)</h2>
+<h2 class="mb-4">Uji Lanjutan Whisper (ASR Quran)</h2>
 <form id="audioForm" method="post" enctype="multipart/form-data">
     <div class="mb-3">
         <label for="ayat_id" class="form-label">Pilih Ayat Referensi</label>
         <select class="form-select" name="ayat_id" id="ayat_id" required>
             <option value="">-- Pilih Ayat --</option>
             {% for ayat in ayat_list %}
-            <option value="{{ ayat.id }}" {% if ayat_id and ayat_id|string == ayat.id|string %}selected{% endif %}>
-                {{ ayat.surah }} - Ayat {{ ayat.ayat }}: {{ ayat.teks }}
+            <option value="{{ ayat.id }}" {% if ayat_id and ayat_id == ayat.id %}selected{% endif %}>
+                {{ ayat.surah }} ({{ ayat.surah_latin }}) - Ayat {{ ayat.ayat }}: {{ ayat.teks }}
             </option>
             {% endfor %}
         </select>
