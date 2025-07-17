@@ -4,15 +4,28 @@
 <h2 class="mb-4">Uji Basic Whisper (ASR Quran)</h2>
 <form id="audioForm" method="post" enctype="multipart/form-data">
     <div class="mb-3">
-        <label for="ayat_id" class="form-label">Pilih Ayat Referensi</label>
+        <label for="surah_id" class="form-label">Pilih Surah</label>
+        <select class="form-select" name="surah_id" id="surah_id" required>
+            <option value="">-- Pilih Surah --</option>
+            {% for surah in ayat_list|groupby('surah_id') %}
+            <option value="{{ surah.grouper }}">{{ surah.list[0].surah_latin }} ({{ surah.list[0].surah }})</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="ayat_id" class="form-label">Pilih Ayat</label>
         <select class="form-select" name="ayat_id" id="ayat_id" required>
             <option value="">-- Pilih Ayat --</option>
             {% for ayat in ayat_list %}
-            <option value="{{ ayat.id }}" {% if ayat_id and ayat_id|string == ayat.id|string %}selected{% endif %}>
-                {{ ayat.surah }} - Ayat {{ ayat.ayat }}: {{ ayat.teks }}
+            <option value="{{ ayat.id }}" data-surah="{{ ayat.surah_id }}" {% if ayat_id and ayat_id|string == ayat.id|string %}selected{% endif %}>
+                Ayat {{ ayat.ayat }}: {{ ayat.teks }}
             </option>
             {% endfor %}
         </select>
+    </div>
+    <div class="mb-3">
+        <label for="nama_user" class="form-label">Nama (opsional)</label>
+        <input class="form-control" type="text" id="nama_user" name="nama_user" value="{{ nama_user or '' }}" placeholder="Nama santri (opsional)">
     </div>
     <div class="mb-3">
         <input class="form-control" type="file" id="audioInput" name="audio" accept="audio/*" required>
@@ -134,5 +147,21 @@ function showValidationError(msg) {
 function hideValidationError() {
     validationError.classList.add('d-none');
 }
+
+// Dropdown dinamis ayat berdasarkan surah
+const surahSelect = document.getElementById('surah_id');
+const ayatSelect = document.getElementById('ayat_id');
+const allAyatOptions = Array.from(ayatSelect.options);
+
+surahSelect.onchange = function() {
+    const surahId = surahSelect.value;
+    ayatSelect.innerHTML = '';
+    ayatSelect.appendChild(new Option('-- Pilih Ayat --', ''));
+    allAyatOptions.forEach(opt => {
+        if (opt.value === '' || opt.getAttribute('data-surah') === surahId) {
+            ayatSelect.appendChild(opt.cloneNode(true));
+        }
+    });
+};
 </script>
 {% endblock %} 

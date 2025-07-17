@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+{% block title %}Riwayat Latihan | ASR Quran{% endblock %}
+{% block content %}
+<h2 class="mb-4">Riwayat Latihan Santri</h2>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Waktu</th>
+            <th>Nama</th>
+            <th>Surah</th>
+            <th>Ayat</th>
+            <th>Mode</th>
+            <th>Transkripsi</th>
+            <th>Referensi</th>
+            <th>Skor</th>
+            <th>Detail</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for l in latihan_list %}
+        <tr>
+            <td>{{ l.waktu }}</td>
+            <td>{{ l.nama_user }}</td>
+            <td>{{ l.surah }}</td>
+            <td>{{ l.ayat }}</td>
+            <td>{{ l.mode }}</td>
+            <td>{{ l.hasil_transkripsi }}</td>
+            <td>{{ l.referensi_ayat }}</td>
+            <td>{{ l.skor }}</td>
+            <td>
+                <span class="badge bg-success">benar: {{ l.detail | selectattr('status', 'equalto', 'benar') | list | length }}</span>
+                <span class="badge bg-danger">salah: {{ l.detail | selectattr('status', 'equalto', 'salah') | list | length }}</span>
+                <span class="badge bg-warning text-dark">tambahan: {{ l.detail | selectattr('status', 'equalto', 'tambahan') | list | length }}</span>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="/" class="btn btn-link mt-3">&larr; Kembali ke Menu Utama</a>
+{% endblock %} 

@@ -1,7 +1,9 @@
 from flask import Flask, render_template
 from routes.asr import asr_bp
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.register_blueprint(asr_bp)
 
 @app.route('/')
