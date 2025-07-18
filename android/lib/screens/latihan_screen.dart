@@ -195,44 +195,63 @@ class _LatihanScreenState extends State<LatihanScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Langkah-langkah
-            Card(
-              color: Colors.deepPurple.shade50,
-              margin: const EdgeInsets.only(bottom: 16),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'Langkah-langkah:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 4),
-                    Text('1. Pilih surah'),
-                    Text('2. Pilih ayat'),
-                    Text('3. Rekam bacaan atau upload audio'),
-                    Text('4. Kirim untuk dikoreksi'),
-                  ],
-                ),
-              ),
-            ),
+            // (Bagian ini dihapus, dipindahkan ke HomeScreen)
             // Info surah & ayat terpilih
             if (_selectedSurah != null && _selectedAyat != null)
-              Card(
-                color: Colors.green.shade50,
-                margin: const EdgeInsets.only(bottom: 16),
-                child: ListTile(
-                  leading: const Icon(
-                    Icons.menu_book_rounded,
-                    color: Colors.green,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Card(
+                    color: Colors.green.shade50,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${_selectedSurah!['nama_latin']} (${_selectedSurah!['nama_arab']})',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.green,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Ayat ${_selectedAyat!['nomor_ayat']}',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 16),
+                          // Ayat Arab besar
+                          Text(
+                            _selectedAyat!['teks_arab'] ?? '',
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Amiri', // jika ada font arab khusus
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          if (_selectedAyat!['teks_terjemah'] != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Text(
+                                _selectedAyat!['teks_terjemah'],
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.black54,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
-                  title: Text(
-                    '${_selectedSurah!['nama_latin']} (${_selectedSurah!['nama_arab']})',
-                  ),
-                  subtitle: Text(
-                    'Ayat ${_selectedAyat!['nomor_ayat']}: ${_selectedAyat!['teks_arab']}',
-                  ),
-                ),
+                ],
               ),
             // Pilih surah & ayat
             ElevatedButton(

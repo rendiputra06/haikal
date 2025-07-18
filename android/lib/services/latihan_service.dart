@@ -4,7 +4,7 @@ import '../constants/app_constants.dart';
 
 class LatihanService {
   static Future<List<Map<String, dynamic>>> fetchSurah() async {
-    final res = await http.get(Uri.parse('${AppConstants.baseUrl}/surah'));
+    final res = await http.get(Uri.parse('${AppConstants.apiUrl}/surah'));
     if (res.statusCode == 200) {
       final List data = json.decode(res.body);
       return data.cast<Map<String, dynamic>>();
@@ -14,7 +14,7 @@ class LatihanService {
 
   static Future<List<Map<String, dynamic>>> fetchAyat(String surahId) async {
     final res = await http.get(
-      Uri.parse('${AppConstants.baseUrl}/ayat?surah_id=$surahId'),
+      Uri.parse('${AppConstants.apiUrl}/ayat?surah_id=$surahId'),
     );
     if (res.statusCode == 200) {
       final List data = json.decode(res.body);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../services/latihan_service.dart';
+import '../widgets/main_layout.dart';
 
 class PilihAyatScreen extends StatefulWidget {
   final String surahId;
@@ -23,17 +23,10 @@ class _PilihAyatScreenState extends State<PilihAyatScreen> {
   Future<void> _fetchAyat() async {
     setState(() => _loading = true);
     try {
-      final res = await http.get(
-        Uri.parse(
-          'http://localhost:5000/asr/api/ayat?surah_id=${widget.surahId}',
-        ),
-      );
-      if (res.statusCode == 200) {
-        final List data = json.decode(res.body);
-        setState(() {
-          _ayatList = data.cast<Map<String, dynamic>>();
-        });
-      }
+      final data = await LatihanService.fetchAyat(widget.surahId);
+      setState(() {
+        _ayatList = data;
+      });
     } catch (e) {
       // Error handling
     } finally {
@@ -43,9 +36,9 @@ class _PilihAyatScreenState extends State<PilihAyatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Pilih Ayat')),
-      body:
+    return MainLayout(
+      title: 'Pilih Ayat',
+      child:
           _loading
               ? const Center(child: CircularProgressIndicator())
               : ListView.separated(
