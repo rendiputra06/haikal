@@ -135,20 +135,112 @@ class _LatihanScreenState extends State<LatihanScreen>
       );
       setState(() {
         _isUploading = false;
-        _uploadSuccess = result['status'] == 200;
+        _uploadSuccess = result['error'] == null;
         _hasRecorded = false;
-        _koreksiResult = _parseKoreksiHtml(result['body'] ?? '');
+        _koreksiResult = null;
       });
       _animController.stop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _uploadSuccess == true
-                ? 'Audio berhasil diupload!'
-                : 'Upload gagal!',
-          ),
-        ),
-      );
+      if (_uploadSuccess == true) {
+        // Tampilkan hasil koreksi dengan format baru
+        showDialog(
+          context: context,
+          builder: (context) {
+            final ayatData = result['ayat_data'] ?? {};
+            final highlight = (result['highlight'] as List?) ?? [];
+            return AlertDialog(
+              title: const Text('Hasil Koreksi'),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Transkripsi:',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(result['transcript'] ?? '-'),
+                    const SizedBox(height: 12),
+                    Text('Skor: ${result['skor'] ?? '-'}'),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Ayat Referensi:',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(result['ayat_referensi'] ?? '-'),
+                    const SizedBox(height: 12),
+                    if (ayatData.isNotEmpty) ...[
+                      Text(
+                        'Surah: ${ayatData['surah_latin'] ?? '-'} (${ayatData['surah'] ?? '-'})',
+                      ),
+                      Text('Ayat: ${ayatData['ayat'] ?? '-'}'),
+                      Text('Teks: ${ayatData['teks'] ?? '-'}'),
+                      const SizedBox(height: 12),
+                    ],
+                    Text(
+                      'Highlight:',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    highlight.isEmpty
+                        ? const Text('-')
+                        : Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          textDirection: TextDirection.rtl,
+                          children:
+                              highlight.map<Widget>((d) {
+                                final kata = d['kata']?.toString() ?? '-';
+                                final status = d['status']?.toString() ?? '-';
+                                final isBenar = status == 'benar';
+                                return Chip(
+                                  label: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        kata,
+                                        style: const TextStyle(fontSize: 16),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Icon(
+                                        isBenar
+                                            ? Icons.check_circle
+                                            : Icons.cancel,
+                                        color:
+                                            isBenar ? Colors.green : Colors.red,
+                                        size: 18,
+                                      ),
+                                    ],
+                                  ),
+                                  backgroundColor:
+                                      isBenar
+                                          ? Colors.green.shade50
+                                          : Colors.red.shade50,
+                                  shape: StadiumBorder(
+                                    side: BorderSide(
+                                      color:
+                                          isBenar ? Colors.green : Colors.red,
+                                      width: 1,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                        ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Tutup'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload gagal! ${result['error'] ?? ''}')),
+        );
+      }
     } catch (e) {
       setState(() {
         _isUploading = false;
@@ -189,7 +281,7 @@ class _LatihanScreenState extends State<LatihanScreen>
     }
     return MainLayout(
       title: 'Latihan Mandiri Al-Qur’an',
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,46 +346,18 @@ class _LatihanScreenState extends State<LatihanScreen>
                 ],
               ),
             // Pilih surah & ayat
-            ElevatedButton(
-              onPressed: () async {
-                final surah = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const PilihSurahScreen()),
-                );
-                if (surah != null) {
-                  setState(() {
-                    _selectedSurah = Map<String, dynamic>.from(surah);
-                    _selectedAyat = null;
-                    _hasRecorded = false;
-                    _uploadSuccess = null;
-                    _audioPath = null;
-                    _koreksiResult = null;
-                    _pickedFileName = null;
-                  });
-                }
-              },
-              child: Text(
-                _selectedSurah == null
-                    ? 'Pilih Surah'
-                    : 'Surah: ${_selectedSurah!['nama_latin']} (${_selectedSurah!['nama_arab']})',
-              ),
-            ),
-            const SizedBox(height: 12),
-            if (_selectedSurah != null)
-              ElevatedButton(
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
                 onPressed: () async {
-                  final ayat = await Navigator.push(
+                  final surah = await Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => PilihAyatScreen(
-                            surahId: _selectedSurah!['id'].toString(),
-                          ),
-                    ),
+                    MaterialPageRoute(builder: (_) => const PilihSurahScreen()),
                   );
-                  if (ayat != null) {
+                  if (surah != null) {
                     setState(() {
-                      _selectedAyat = Map<String, dynamic>.from(ayat);
+                      _selectedSurah = Map<String, dynamic>.from(surah);
+                      _selectedAyat = null;
                       _hasRecorded = false;
                       _uploadSuccess = null;
                       _audioPath = null;
@@ -303,9 +367,43 @@ class _LatihanScreenState extends State<LatihanScreen>
                   }
                 },
                 child: Text(
-                  _selectedAyat == null
-                      ? 'Pilih Ayat'
-                      : 'Ayat ${_selectedAyat!['nomor_ayat']}: ${_selectedAyat!['teks_arab']}',
+                  _selectedSurah == null
+                      ? 'Pilih Surah'
+                      : 'Surah: ${_selectedSurah!['nama_latin']} (${_selectedSurah!['nama_arab']})',
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (_selectedSurah != null)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final ayat = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) => PilihAyatScreen(
+                              surahId: _selectedSurah!['id'].toString(),
+                            ),
+                      ),
+                    );
+                    if (ayat != null) {
+                      setState(() {
+                        _selectedAyat = Map<String, dynamic>.from(ayat);
+                        _hasRecorded = false;
+                        _uploadSuccess = null;
+                        _audioPath = null;
+                        _koreksiResult = null;
+                        _pickedFileName = null;
+                      });
+                    }
+                  },
+                  child: Text(
+                    _selectedAyat == null
+                        ? 'Pilih Ayat'
+                        : 'Ayat ${_selectedAyat!['nomor_ayat']}: ${_selectedAyat!['teks_arab']}',
+                  ),
                 ),
               ),
             const SizedBox(height: 16),

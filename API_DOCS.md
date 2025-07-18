@@ -155,10 +155,58 @@ Jika data tidak ditemukan:
 
 ---
 
+## 5. POST /api/asr/upload
+
+Upload audio bacaan untuk proses ASR dan penilaian otomatis.
+
+- **Endpoint:** `/api/asr/upload`
+- **Method:** POST
+- **Content-Type:** multipart/form-data
+- **Parameter:**
+  - `audio` (file, wajib): File audio bacaan (format .wav/.mp3, dsb)
+  - `ayat_id` (wajib): ID ayat referensi
+  - `nama_user` (opsional): Nama user
+- **Response:**
+
+```json
+{
+  "transcript": "bismillah ...",
+  "skor": 5,
+  "highlight": [
+    {"kata": "بسم", "status": "benar"},
+    {"kata": "الله", "status": "benar"},
+    ...
+  ],
+  "ayat_referensi": "بسم الله الرحمن الرحيم",
+  "ayat_data": {
+    "surah_id": 1,
+    "surah": "الفاتحة",
+    "surah_latin": "Al-Fatihah",
+    "id": 1,
+    "ayat": 1,
+    "teks": "بسم الله الرحمن الرحيم"
+  }
+}
+```
+
+### Contoh Request (curl)
+
+```
+curl -X POST -F "audio=@/path/to/audio.wav" -F "ayat_id=1" -F "nama_user=nama" http://localhost:5000/api/asr/upload
+```
+
+Jika terjadi error:
+
+```json
+{ "error": "File audio tidak ditemukan" }
+```
+
+---
+
 ## Catatan Penting
 
-- Endpoint API hanya untuk mengambil data surah dan ayat, **bukan** untuk upload audio.
-- Untuk fitur ASR (upload audio, perbandingan bacaan), gunakan halaman web yang sudah disediakan.
+- Endpoint API hanya untuk mengambil data surah dan ayat, serta upload audio untuk penilaian otomatis.
+- Untuk fitur ASR (upload audio, perbandingan bacaan via web), gunakan halaman web yang sudah disediakan.
 - Semua response API dalam format JSON.
 - Untuk integrasi mobile/web lain, pastikan CORS diaktifkan jika akses lintas domain.
 

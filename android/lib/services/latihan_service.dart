@@ -29,12 +29,19 @@ class LatihanService {
     String namaUser = '',
   }) async {
     final req =
-        http.MultipartRequest('POST', Uri.parse(AppConstants.uploadUrl))
+        http.MultipartRequest(
+            'POST',
+            Uri.parse('${AppConstants.apiUrl}/asr/upload'),
+          )
           ..fields['ayat_id'] = ayatId
           ..fields['nama_user'] = namaUser
           ..files.add(await http.MultipartFile.fromPath('audio', audioPath));
     final res = await req.send();
     final responseBody = await res.stream.bytesToString();
-    return {'status': res.statusCode, 'body': responseBody};
+    if (res.statusCode == 200) {
+      return json.decode(responseBody) as Map<String, dynamic>;
+    }
+    // Jika error, kembalikan error message
+    return {'status': res.statusCode, 'error': responseBody};
   }
 }

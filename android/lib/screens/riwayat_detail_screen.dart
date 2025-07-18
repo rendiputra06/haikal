@@ -173,6 +173,7 @@ class _RiwayatDetailScreenState extends State<RiwayatDetailScreen> {
                     : Wrap(
                       spacing: 8,
                       runSpacing: 4,
+                      textDirection: TextDirection.rtl,
                       children:
                           detailList.map<Widget>((d) {
                             final kata = d['word']?.toString() ?? '-';

@@ -1,6 +1,13 @@
 from flask import Blueprint, request, jsonify
-from db import get_db_connection
+from db import get_db_connection, simpan_latihan
 import json
+from services.whisper_service import transcribe_audio
+from services.compare_service import compare_texts
+import os
+import re
+
+def remove_arabic_diacritics(text):
+    return re.sub(r'[\u064B-\u0652\u0670\u06D6-\u06ED]', '', text)
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -108,4 +115,55 @@ def api_riwayat_detail(riwayat_id):
         'surah_data': surah_data,
         'ayat_data': ayat_data
     }
-    return jsonify(riwayat_detail) 
+    return jsonify(riwayat_detail)
+
+@api_bp.route('/asr/upload', methods=['POST'])
+def api_asr_upload():
+    if 'audio' not in request.files:
+        return jsonify({'error': 'File audio tidak ditemukan'}), 400
+    ayat_id = request.form.get('ayat_id')
+    nama_user = request.form.get('nama_user', 'anonim')
+    if not ayat_id:
+        return jsonify({'error': 'ayat_id wajib diisi'}), 400
+    audio_file = request.files['audio']
+
+    # Ambil data ayat referensi dari DB
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('SELECT s.id, s.nama_arab, s.nama_latin, a.id, a.nomor_ayat, a.teks_arab FROM surah s JOIN ayat a ON s.id = a.surah_id WHERE a.id = ?', (ayat_id,))
+    row = c.fetchone()
+    conn.close()
+    if not row:
+        return jsonify({'error': 'Ayat referensi tidak ditemukan'}), 404
+    ayat_ref = {
+        'surah_id': row[0],
+        'surah': row[1],
+        'surah_latin': row[2],
+        'id': row[3],
+        'ayat': row[4],
+        'teks': row[5]
+    }
+    try:
+        transcript = transcribe_audio(audio_file)
+        ayat_ref_clean = remove_arabic_diacritics(ayat_ref['teks'])
+        highlight = compare_texts(transcript, ayat_ref_clean)
+        skor = sum(1 for item in highlight if item['status'] == 'benar') if highlight else 0
+        simpan_latihan(
+            nama_user=nama_user,
+            surah=ayat_ref['surah_latin'],
+            ayat=str(ayat_ref['ayat']),
+            mode='api',
+            hasil_transkripsi=transcript,
+            referensi_ayat=ayat_ref_clean,
+            skor=skor,
+            detail=json.dumps(highlight, ensure_ascii=False)
+        )
+        return jsonify({
+            'transcript': transcript,
+            'skor': skor,
+            'highlight': highlight,
+            'ayat_referensi': ayat_ref_clean,
+            'ayat_data': ayat_ref
+        })
+    except Exception as e:
+        return jsonify({'error': f'Gagal transkripsi: {str(e)}'}), 500 
